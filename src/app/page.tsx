@@ -278,6 +278,12 @@ export default function FinanceDashboard() {
           ))}
         </div>
       </div>
+
+      <div className="sm:absolute bottom-4 w-full text-center mt-4">
+        <div className="text-gray-400 text-xs hover:text-gray-300 transition-colors">
+          <a href="https://linktr.ee/igorfel">Developed by 🤖 Livingbots</a>
+        </div>
+      </div>
     </div>
   );
 }
