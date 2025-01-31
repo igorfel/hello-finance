@@ -2,62 +2,35 @@
 import { useState, useEffect } from "react";
 
 export default function FinanceDashboard() {
-  // State initialization with localStorage
-  const [salary, setSalary] = useState(() => {
-    const saved =
-      typeof window !== "undefined" ? localStorage.getItem("salary") : null;
-    return saved ? Number(saved) : 0;
-  });
-
-  const [spending, setSpending] = useState(() => {
-    const saved =
-      typeof window !== "undefined" ? localStorage.getItem("spending") : null;
-    return saved ? Number(saved) : 50;
-  });
-
-  const [saving, setSaving] = useState(() => {
-    const saved =
-      typeof window !== "undefined" ? localStorage.getItem("saving") : null;
-    return saved ? Number(saved) : 30;
-  });
-
-  const [investing, setInvesting] = useState(() => {
-    const saved =
-      typeof window !== "undefined" ? localStorage.getItem("investing") : null;
-    return saved ? Number(saved) : 20;
-  });
-
+  const [isClient, setIsClient] = useState(false);
+  const [salary, setSalary] = useState(0);
+  const [spending, setSpending] = useState(50);
+  const [saving, setSaving] = useState(30);
+  const [investing, setInvesting] = useState(20);
   const [goals, setGoals] = useState<
     Array<{ name: string; target: number; acquired: number }>
-  >(() => {
-    const saved =
-      typeof window !== "undefined" ? localStorage.getItem("goals") : null;
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  >([]);
   const [newGoal, setNewGoal] = useState("");
   const [newTarget, setNewTarget] = useState("");
 
-  // Save to localStorage effects
   useEffect(() => {
-    localStorage.setItem("salary", salary.toString());
-  }, [salary]);
+    setIsClient(true);
+    setSalary(Number(localStorage.getItem("salary") || 0));
+    setSpending(Number(localStorage.getItem("spending") || 50));
+    setSaving(Number(localStorage.getItem("saving") || 30));
+    setInvesting(Number(localStorage.getItem("investing") || 20));
+    setGoals(JSON.parse(localStorage.getItem("goals") || "[]"));
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem("spending", spending.toString());
-  }, [spending]);
-
-  useEffect(() => {
-    localStorage.setItem("saving", saving.toString());
-  }, [saving]);
-
-  useEffect(() => {
-    localStorage.setItem("investing", investing.toString());
-  }, [investing]);
-
-  useEffect(() => {
-    localStorage.setItem("goals", JSON.stringify(goals));
-  }, [goals]);
+    if (isClient) {
+      localStorage.setItem("salary", salary.toString());
+      localStorage.setItem("spending", spending.toString());
+      localStorage.setItem("saving", saving.toString());
+      localStorage.setItem("investing", investing.toString());
+      localStorage.setItem("goals", JSON.stringify(goals));
+    }
+  }, [salary, spending, saving, investing, goals, isClient]);
 
   const handleSalarySubmit = (e: React.FormEvent) => {
     e.preventDefault();
