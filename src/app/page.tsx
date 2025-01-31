@@ -7,15 +7,19 @@ type Transaction = {
   date: Date;
 };
 
+type Goal = {
+  name: string;
+  target: number;
+  acquired: number;
+};
+
 export default function FinanceDashboard() {
   const [isClient, setIsClient] = useState(false);
   const [salary, setSalary] = useState(0);
   const [spending, setSpending] = useState(50);
   const [saving, setSaving] = useState(30);
   const [investing, setInvesting] = useState(20);
-  const [goals, setGoals] = useState<
-    Array<{ name: string; target: number; acquired: number }>
-  >([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [newGoal, setNewGoal] = useState("");
   const [newTarget, setNewTarget] = useState("");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -27,23 +31,13 @@ export default function FinanceDashboard() {
     new Date().toISOString().slice(0, 7)
   );
 
-  // Type-safe budget sections
-  const budgetSections = [
-    { category: "spending" as const, label: "Gastos", color: "bg-blue-50" },
-    { category: "saving" as const, label: "Economias", color: "bg-green-50" },
-    {
-      category: "investing" as const,
-      label: "Investimentos",
-      color: "bg-purple-50",
-    },
-  ];
-
   const salaryAmounts = {
     spending: (salary * spending) / 100,
     saving: (salary * saving) / 100,
     investing: (salary * investing) / 100,
   };
 
+  // Load data from localStorage
   useEffect(() => {
     setIsClient(true);
     const loadData = () => {
@@ -57,6 +51,7 @@ export default function FinanceDashboard() {
     loadData();
   }, []);
 
+  // Save data to localStorage
   useEffect(() => {
     if (isClient) {
       localStorage.setItem("salary", salary.toString());
@@ -102,7 +97,7 @@ export default function FinanceDashboard() {
   };
 
   const ProgressBar = ({ spent, total }: { spent: number; total: number }) => (
-    <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+    <div className="h-3 bg-gray-200 rounded-full overflow-hidden mb-2">
       <div
         className="h-full bg-blue-600 transition-all duration-300"
         style={{ width: `${Math.min((spent / total) * 100, 100)}%` }}
@@ -112,7 +107,7 @@ export default function FinanceDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      {/* Salary Configuration - Mobile Optimized */}
+      {/* Salary Configuration */}
       <div className="max-w-4xl mx-auto mb-6 bg-white p-4 rounded-lg shadow-sm">
         <h2 className="text-xl font-bold mb-3">Configuração de Salário</h2>
         <form
@@ -135,7 +130,7 @@ export default function FinanceDashboard() {
         </form>
       </div>
 
-      {/* Month Selector - Mobile Centered */}
+      {/* Month Selector */}
       <div className="max-w-4xl mx-auto mb-6 flex justify-center">
         <input
           type="month"
@@ -145,9 +140,25 @@ export default function FinanceDashboard() {
         />
       </div>
 
-      {/* Budget Cards - Mobile Stack */}
+      {/* Budget Cards */}
       <div className="max-w-4xl mx-auto space-y-4">
-        {budgetSections.map((section) => {
+        {[
+          {
+            category: "spending" as const,
+            label: "Gastos",
+            color: "bg-blue-50",
+          },
+          {
+            category: "saving" as const,
+            label: "Economias",
+            color: "bg-green-50",
+          },
+          {
+            category: "investing" as const,
+            label: "Investimentos",
+            color: "bg-purple-50",
+          },
+        ].map((section) => {
           const spent = getMonthlyTotal(section.category);
           const total = salaryAmounts[section.category];
           const remaining = total - spent;
@@ -197,7 +208,7 @@ export default function FinanceDashboard() {
         })}
       </div>
 
-      {/* Goals Management - Mobile Optimized */}
+      {/* Goals Management */}
       <div className="max-w-4xl mx-auto mt-8 bg-white p-4 rounded-lg shadow-sm">
         <h2 className="text-xl font-bold mb-4">Metas Financeiras</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
@@ -248,6 +259,7 @@ export default function FinanceDashboard() {
                   R${goal.acquired} / R${goal.target}
                 </span>
               </div>
+              <ProgressBar spent={goal.acquired} total={goal.target} />
               <input
                 type="number"
                 value={goal.acquired}
@@ -259,7 +271,7 @@ export default function FinanceDashboard() {
                   );
                   setGoals(updatedGoals);
                 }}
-                className="border-2 border-gray-300 p-2 rounded-lg w-full text-sm"
+                className="border-2 border-gray-300 p-2 rounded-lg w-full text-sm mt-2"
                 placeholder="Progresso"
               />
             </div>
